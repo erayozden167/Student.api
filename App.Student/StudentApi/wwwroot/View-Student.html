@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Student</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>View Student</h2>
+        <form id="viewStudentForm">
+            <!-- Form field for Student ID -->
+            <div class="form-group">
+                <label for="studentId">Student ID</label>
+                <input type="number" class="form-control" id="studentId" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="viewStudent()">View Student</button>
+        </form>
+        <a href="List-Student.html" class="btn btn-secondary mt-3">Back</a>
+
+        <div id="studentDetails" class="mt-3"></div>
+    </div>
+
+    <script>
+        function viewStudent() {
+            const studentId = document.getElementById('studentId').value;
+
+            fetch(`https://localhost:7254/api/Student/${studentId}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 404) {
+                        throw new Error('Student not found.');
+                    } else {
+                        throw new Error('Error retrieving student details.');
+                    }
+                })
+                .then(data => {
+                    document.getElementById('studentDetails').innerHTML = `
+                            <h3>Student Details</h3>
+                            <p><strong>First Name:</strong> ${data.firstName}</p>
+                            <p><strong>Last Name:</strong> ${data.lastName}</p>
+                            <p><strong>No:</strong> ${data.id}</p>
+                            <p><strong>Age:</strong> ${data.age}</p>
+                            <p><strong>Phone Number:</strong> ${data.phoneNumber}</p>
+                            <p><strong>Address:</strong> ${data.address}</p>
+                        `;
+                })
+                .catch(error => {
+                    document.getElementById('studentDetails').innerHTML = '<p class="text-danger">Error retrieving student details: ' + error.message + '</p>';
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student List</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .btn-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Student List</h2>
+        <div class="btn-container">
+            <a href="add-student.html" class="btn btn-primary">Add Student</a>
+            <a href="update-student.html" class="btn btn-secondary">Update Student</a>
+            <a href="delete-student.html" class="btn btn-danger">Delete Student</a>
+            <a href="view-student.html" class="btn btn-info">View Student</a>
+        </div>
+
+        <div id="studentList" class="mt-4">
+        </div>
+    </div>
+
+    <script>
+        function fetchStudents() {
+            fetch('https://localhost:7254/api/Student')
+                .then(response => response.json())
+                .then(data => {
+                    const studentListContainer = document.getElementById('studentList');
+                    studentListContainer.innerHTML = '<h3>Students</h3><ul class="list-group">';
+
+                    data.forEach(student => {
+                        studentListContainer.innerHTML += `
+                            <li class="list-group-item">
+                                <strong>${student.fullName}</strong>
+                                <p><strong>No:</strong>${student.id}</p>
+                                <p><strong>Email:</strong> ${student.email}</p>
+                                <p><strong>Phone:</strong> ${student.phoneNumber}</p>
+                                <p><strong>Age:</strong> ${student.age}</p>
+                            </li>
+                        `;
+                    });
+
+                    studentListContainer.innerHTML += '</ul>';
+                })
+                .catch(error => {
+                    console.error('Error fetching students:', error);
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchStudents);
+    </script>
+</body>
+</html>

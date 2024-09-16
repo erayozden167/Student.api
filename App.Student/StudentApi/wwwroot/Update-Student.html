@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Student</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Update Student</h2>
+        <form id="updateStudentForm">
+            <div class="form-group">
+                <label for="studentId">Student ID</label>
+                <input type="text" class="form-control" id="studentId" required>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="loadStudent()">Load Student</button>
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input type="text" class="form-control" id="firstName" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input type="text" class="form-control" id="lastName" required>
+            </div>
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" class="form-control" id="age" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber">Phone Number</label>
+                <input type="text" class="form-control" id="phoneNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea class="form-control" id="address" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Student</button>
+        </form>
+        <a href="List-Student.html" class="btn btn-secondary mt-3">Back</a>
+
+        <div id="updateMessage" class="mt-3"></div>
+    </div>
+
+    <script>
+        function loadStudent() {
+            const studentId = document.getElementById('studentId').value;
+            if (!studentId) {
+                alert('Please enter a student ID.');
+                return;
+            }
+
+            fetch(`https://localhost:7254/api/Student/${studentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Student not found.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('firstName').value = data.firstName;
+                    document.getElementById('lastName').value = data.lastName;
+                    document.getElementById('age').value = data.age;
+                    document.getElementById('email').value = data.email;
+                    document.getElementById('phoneNumber').value = data.phone;
+                    document.getElementById('address').value = data.address;
+                })
+                .catch(error => {
+                    document.getElementById('updateMessage').textContent = 'Error loading student data: ' + error.message;
+                });
+        }
+
+        function validateForm() {
+            const form = document.getElementById('updateStudentForm');
+            let isValid = true;
+
+            Array.from(form.elements).forEach(input => {
+                if (input.type !== 'submit' && input.type !== 'button') {
+                    if (!input.checkValidity()) {
+                        isValid = false;
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                }
+            });
+
+            return isValid;
+        }
+
+        function updateStudent(event) {
+            event.preventDefault(); 
+
+            if (!validateForm()) {
+                return;
+            }
+
+            const age = parseInt(document.getElementById('age').value);
+            const studentId = document.getElementById('studentId').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const address = document.getElementById('address').value;
+
+            const dateOfBirth = calculateDateOfBirth(age);
+
+            const student = {
+                id: studentId,
+                firstName: firstName,
+                lastName: lastName,
+                dateOfBirth: dateOfBirth,
+                email: email,
+                phoneNumber: phoneNumber,
+                address: address
+            };
+
+            fetch('https://localhost:7254/api/Student/' + student.id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(student)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(error => {
+                            throw new Error(error.message || 'Error updating student.');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('updateMessage').textContent = 'Student updated successfully!';
+                })
+                .catch(error => {
+                    document.getElementById('updateMessage').textContent = 'Error updating student: ' + error.message;
+                });
+        }
+
+        function calculateDateOfBirth(age) {
+            if (isNaN(age) || age < 0) {
+                throw new Error('Invalid age');
+            }
+            const today = new Date();
+            const birthYear = today.getFullYear() - age;
+            const birthDate = new Date(today.setFullYear(birthYear));
+
+            birthDate.setMonth(0);
+            birthDate.setDate(1);
+
+            return birthDate.toISOString().split('T')[0];
+        }
+
+        document.getElementById('updateStudentForm').addEventListener('submit', updateStudent);
+    </script>
+</body>
+</html>
